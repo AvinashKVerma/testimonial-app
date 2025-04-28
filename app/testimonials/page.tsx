@@ -1,7 +1,6 @@
 import TestimonialGrid from "@/app/components/testimonial-grid";
 import dbConnect from "@/lib/mongoose";
 import Testimonial from "../models/Testimonial";
-import User from "../models/User"; // Import the User model if needed
 
 export default async function TestimonialsPage() {
   await dbConnect();

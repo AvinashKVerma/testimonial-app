@@ -1,5 +1,5 @@
 // lib/mongoose.ts
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI || "";
 
@@ -9,14 +9,21 @@ if (!MONGODB_URI) {
   );
 }
 
-/**
- * Global is used here to maintain a cached connection across hot reloads
- */
-let cached = (global as any).mongoose;
-
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+// 1. Define an interface for the cached connection
+interface MongooseCache {
+  conn: Mongoose | null;
+  promise: Promise<Mongoose> | null;
 }
+
+// 2. Extend the global type properly
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoose: MongooseCache | undefined;
+}
+
+// 3. Use const, and set a fallback
+const cached =
+  global.mongoose ?? (global.mongoose = { conn: null, promise: null });
 
 async function dbConnect() {
   if (cached.conn) {

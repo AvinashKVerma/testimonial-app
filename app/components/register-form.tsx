@@ -76,11 +76,13 @@ export default function RegisterForm() {
       });
 
       router.push("/login");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Registration error:", error);
       addToast({
         title: "Error",
-        description: error.message || "Something went wrong. Please try again.",
+        description:
+          (error as Error)?.message ||
+          "Something went wrong. Please try again.",
         color: "danger",
       });
     } finally {

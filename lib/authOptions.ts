@@ -1,17 +1,25 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
-
 import dbConnect from "@/lib/mongoose";
 import User from "@/app/models/User";
+
+// Define a custom user interface for better type safety
+interface CustomUser {
+  _id: string;
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
 
 declare module "next-auth" {
   interface Session {
     user: {
-      _id: string;
       id: string;
+      _id: string;
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -19,19 +27,11 @@ declare module "next-auth" {
   }
 
   interface User {
-    _id: string;
     id: string;
+    _id: string;
     name?: string | null;
     email?: string | null;
     image?: string | null;
-    password?: string | null;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    _id: string;
-    id: string;
   }
 }
 
@@ -71,7 +71,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         return {
-          _id: user._id.toString(), // returning both _id and id
+          _id: user._id.toString(),
           id: user._id.toString(),
           name: user.name,
           email: user.email,
@@ -89,8 +89,9 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token._id = (user as any)._id; // since NextAuth's `user` type doesn't know _id by default
+        const customUser = user as CustomUser;
+        token.id = customUser.id;
+        token._id = customUser._id;
       }
       return token;
     },
@@ -112,7 +113,6 @@ export const authOptions: NextAuthOptions = {
         await dbConnect();
 
         const email = user.email;
-
         if (!email) return;
 
         const existingUser = await User.findOne({ email });
@@ -129,7 +129,3 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
-
-const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST };

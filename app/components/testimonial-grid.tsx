@@ -21,7 +21,7 @@ import {
 import { formatDate } from "@/lib/utils";
 
 type TestimonialWithUser = {
-  name: any;
+  name: string;
   id: string;
   course: string;
   type: "text" | "audio" | "video";
@@ -85,13 +85,13 @@ export default function TestimonialGrid({
         <div className="flex gap-2">
           {/* Filter buttons */}
           <div className="flex border rounded-md overflow-hidden">
-            {["all", "text", "audio", "video"].map((type) => (
+            {(["all", "text", "audio", "video"] as const).map((type) => (
               <Button
                 key={type}
                 variant={filter === type ? "solid" : "ghost"}
                 size="sm"
                 className="rounded-none capitalize"
-                onPress={() => setFilter(type as any)}
+                onPress={() => setFilter(type)}
               >
                 {type !== "all" && getTypeIcon(type)}
                 {type}

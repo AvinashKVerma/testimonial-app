@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -21,6 +23,7 @@ import {
   Switch,
 } from "@heroui/react";
 import { FaPlay, FaStopCircle } from "react-icons/fa";
+import type { User } from "next-auth";
 
 const courses = [
   "Web Development Fundamentals",
@@ -31,7 +34,7 @@ const courses = [
   "Next.js for Production",
 ];
 
-export default function SubmitForm({ user }: { user: any }) {
+export default function SubmitForm({ user }: { user: User }) {
   const router = useRouter();
   const formatter = useDateFormatter({ dateStyle: "full" });
 
@@ -142,7 +145,6 @@ export default function SubmitForm({ user }: { user: any }) {
       clearBlobUrl();
     }
   };
-
   // Handle toggling between recording and file upload
   const toggleRecording = () => {
     setFormValues((prev) => ({
@@ -310,7 +312,6 @@ export default function SubmitForm({ user }: { user: any }) {
           )}
         </div>
       )}
-
       <DatePicker
         classNames={{ base: "w-full" }}
         aria-label="Pick a date"
