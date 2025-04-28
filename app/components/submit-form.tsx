@@ -1,8 +1,6 @@
 "use client";
-
 import type React from "react";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { parseDate, getLocalTimeZone } from "@internationalized/date";
@@ -42,12 +40,17 @@ export default function SubmitForm({ user }: { user: User }) {
   const [formValues, setFormValues] = useState({
     name: user?.name || "",
     course: "",
-    type: "text",
+    type: "video",
     content: "",
     date: new Date(),
     file: null as File | null, // added file input state
     isRecording: false, // Track whether recording or uploading
   });
+  const [isClient, setIsClient] = useState(false); // To check if we are in the browser
+
+  useEffect(() => {
+    setIsClient(true); // Only set once the component has mounted in the browser
+  }, []);
 
   const testimonialType = formValues.type;
 
@@ -66,6 +69,8 @@ export default function SubmitForm({ user }: { user: User }) {
       type: testimonialType === "video" ? "video/webm" : "audio/webm",
     },
   });
+
+  if (typeof window === "undefined") return null; // extra safety
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -145,6 +150,7 @@ export default function SubmitForm({ user }: { user: User }) {
       clearBlobUrl();
     }
   };
+
   // Handle toggling between recording and file upload
   const toggleRecording = () => {
     setFormValues((prev) => ({
@@ -153,6 +159,10 @@ export default function SubmitForm({ user }: { user: User }) {
       file: null, // clear file when toggling between recording and upload
     }));
   };
+
+  if (!isClient) {
+    return null; // Prevent rendering SSR
+  }
 
   return (
     <Form className="space-y-8 w-full" onSubmit={onSubmit}>
