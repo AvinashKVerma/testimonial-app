@@ -1,4 +1,3 @@
-// app/models/Testimonial.ts
 import { Document, Schema, model, models } from "mongoose";
 
 export interface ITestimonial extends Document {
@@ -6,9 +5,9 @@ export interface ITestimonial extends Document {
   course: string;
   type: string;
   content: string;
-  message: string;
+  message?: string;
   date: Date;
-  userId: string; // ✅ userId is a string, not ObjectId
+  userId: Schema.Types.ObjectId; // Correct type (ObjectId)
 }
 
 const TestimonialSchema = new Schema<ITestimonial>(
@@ -19,13 +18,14 @@ const TestimonialSchema = new Schema<ITestimonial>(
     content: { type: String, required: true },
     message: { type: String },
     date: { type: Date, required: true },
-    userId: { type: String, required: true }, // userId is now a string
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true }, // Correct: ObjectId with ref
   },
   {
     timestamps: true,
   }
 );
 
+// Safely create model or use existing to avoid "overwrite model" error
 const Testimonial =
   models.Testimonial || model<ITestimonial>("Testimonial", TestimonialSchema);
 

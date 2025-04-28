@@ -97,3 +97,45 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    await dbConnect();
+
+    const { searchParams } = new URL(req.url);
+    const limitParam = searchParams.get("number"); // how many testimonials to fetch
+    const pageParam = searchParams.get("page"); // which page to fetch (optional)
+
+    const limit = limitParam ? parseInt(limitParam, 10) : 10; // default 10 testimonials
+    const page = pageParam ? parseInt(pageParam, 10) : 1; // default page 1
+
+    if (isNaN(limit) || limit <= 0 || isNaN(page) || page <= 0) {
+      return NextResponse.json(
+        { message: "Invalid query parameters" },
+        { status: 400 }
+      );
+    }
+
+    const testimonials = await Testimonial.find({})
+      .sort({ date: -1 }) // Latest first
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(); // Convert to plain JS object for faster response
+
+    const totalTestimonials = await Testimonial.countDocuments();
+
+    return NextResponse.json({
+      testimonials,
+      total: totalTestimonials,
+      page,
+      limit,
+      totalPages: Math.ceil(totalTestimonials / limit),
+    });
+  } catch (error) {
+    console.error("Error fetching testimonials:", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
