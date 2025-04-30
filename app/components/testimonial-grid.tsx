@@ -8,9 +8,11 @@ import {
   Avatar,
   Button,
   Input,
+  Tabs,
+  Tab,
+  Divider,
 } from "@heroui/react";
 import {
-  FaQuoteLeft,
   FaVideo,
   FaHeadphones,
   FaFileAlt,
@@ -84,39 +86,58 @@ export default function TestimonialGrid({
         </div>
         <div className="flex gap-2">
           {/* Filter buttons */}
-          <div className="flex border rounded-md overflow-hidden">
-            {(["all", "text", "audio", "video"] as const).map((type) => (
-              <Button
-                key={type}
-                variant={filter === type ? "solid" : "ghost"}
-                size="sm"
-                className="rounded-none capitalize"
-                onPress={() => setFilter(type)}
-              >
-                {type !== "all" && getTypeIcon(type)}
-                {type}
-              </Button>
-            ))}
+          <div className="flex flex-wrap gap-4">
+            <Tabs
+              aria-label="Tabs colors"
+              color={"warning"}
+              selectedKey={filter}
+              onSelectionChange={(key) =>
+                setFilter(key as "text" | "audio" | "video" | "all")
+              }
+              radius="full"
+            >
+              {(["all", "text", "audio", "video"] as const).map((type) => (
+                <Tab
+                  key={type}
+                  title={
+                    <div className="flex items-center space-x-2">
+                      {type !== "all" && getTypeIcon(type)}
+                      <span>{type.toLocaleUpperCase()}</span>
+                    </div>
+                  }
+                />
+              ))}
+            </Tabs>
           </div>
 
           {/* View mode toggle */}
-          <div className="flex border rounded-md overflow-hidden">
-            <Button
-              variant={viewMode === "grid" ? "solid" : "ghost"}
-              size="sm"
-              onPress={() => setViewMode("grid")}
-              className="rounded-none"
+          <div className="flex flex-wrap gap-4">
+            <Tabs
+              aria-label="Tabs colors"
+              color={"warning"}
+              selectedKey={viewMode}
+              onSelectionChange={(key) => setViewMode(key as "grid" | "list")}
+              radius="full"
             >
-              <FaThLarge className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "solid" : "ghost"}
-              size="sm"
-              onPress={() => setViewMode("list")}
-              className="rounded-none"
-            >
-              <FaList className="w-4 h-4" />
-            </Button>
+              <Tab
+                key={"grid"}
+                title={
+                  <div className="flex items-center space-x-2">
+                    <FaThLarge className="w-4 h-4" />
+                    <span>Grid</span>
+                  </div>
+                }
+              />
+              <Tab
+                key={"list"}
+                title={
+                  <div className="flex items-center space-x-2">
+                    <FaList className="w-4 h-4" />
+                    <span>List</span>
+                  </div>
+                }
+              />
+            </Tabs>
           </div>
         </div>
       </div>
@@ -129,52 +150,64 @@ export default function TestimonialGrid({
       ) : viewMode === "grid" ? (
         <div className="gap-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {filteredTestimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="h-full">
-              <CardHeader className="flex justify-between items-start">
-                <div className="flex items-center gap-4">
-                  <Avatar
-                    showFallback
-                    name={testimonial.user.name ?? "Unknown User"} // Use name directly from outer object
-                    src={testimonial.user?.image ?? ""} // Fallback for image
-                    radius="full"
-                    size="md"
-                    isBordered
-                  />
-                  <div className="flex flex-col gap-0.5">
-                    <p className="font-semibold text-sm">{testimonial.name}</p>
-                    <span className="text-default-400 text-xs">
-                      {formatDate(testimonial.date)}
-                    </span>
+            <Card
+              key={testimonial.id}
+              className="bg-white shadow-lg hover:shadow-xl border border-gray-100 rounded-2xl h-full transition-all duration-300"
+            >
+              <CardHeader className="flex flex-col justify-between items-center gap-3 p-3 rounded-t-2xl w-full">
+                <div className="flex justify-between items-center w-full">
+                  <div className="flex items-center gap-4">
+                    <Avatar
+                      showFallback
+                      name={testimonial.name ?? "Unknown User"}
+                      src={testimonial.user?.image ?? ""}
+                      radius="full"
+                      size="lg"
+                      isBordered
+                      className=""
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-800 text-sm">
+                        {testimonial.name}
+                      </p>
+                      <span className="text-gray-500 text-xs">
+                        {formatDate(testimonial.date)}
+                      </span>
+                    </div>
                   </div>
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    className="bg-primary/10 px-3 py-1.5 rounded-full font-medium text-primary text-xs capitalize"
+                  >
+                    {getTypeIcon(testimonial.type)} {testimonial.type}
+                  </Button>
                 </div>
-                <Button
-                  variant="bordered"
-                  className="flex items-center gap-1 rounded-full h-6 capitalize"
-                >
-                  {getTypeIcon(testimonial.type)}
-                  {testimonial.type}
-                </Button>
               </CardHeader>
-              <CardBody className="pt-0">
-                <FaQuoteLeft className="opacity-10 mb-2 w-6 h-6 text-primary" />
-                {testimonial.type === "text" ? (
-                  <p className="italic">{testimonial.content}</p>
-                ) : testimonial.type === "audio" ? (
-                  <audio
-                    src={testimonial.content}
-                    controls
-                    className="mt-2 w-full"
-                  />
-                ) : (
-                  <video
-                    src={testimonial.content}
-                    controls
-                    className="mt-2 rounded-md w-full"
-                  />
-                )}
-                <p className="mt-4 font-medium text-default-500 text-sm">
-                  Course: {testimonial.course}
-                </p>
+              <Divider />
+              <CardBody className="p-3">
+                <div className="text-gray-700 text-sm leading-relaxed">
+                  {testimonial.type === "text" ? (
+                    <p className="italic">{testimonial.content}</p>
+                  ) : testimonial.type === "audio" ? (
+                    <audio
+                      src={testimonial.content}
+                      controls
+                      className="w-full"
+                    />
+                  ) : (
+                    <video
+                      src={testimonial.content}
+                      controls
+                      className="border rounded-lg w-full"
+                    />
+                  )}
+                </div>
+
+                <div className="pt-4 text-gray-500 text-sm">
+                  📘 <span className="font-medium text-gray-700">Course:</span>{" "}
+                  {testimonial.course}
+                </div>
               </CardBody>
             </Card>
           ))}
